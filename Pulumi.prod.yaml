@@ -1,0 +1,3 @@
+config:
+  aws:profile: pulumiprod
+  aws:region: ca-central-1

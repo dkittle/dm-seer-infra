@@ -1,0 +1,5 @@
+formatting:
+  MaximumLineLength:
+    maxLineLength: 128
+    ignoreBackTickedIdentifier: true
+
