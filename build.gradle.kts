@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "1.7.10"
+    kotlin("jvm") version "1.8.10"
     application
 }
 
@@ -25,14 +25,14 @@ java {
 }
 
 dependencies {
-    implementation("com.pulumi:pulumi:(,1.0]")
-    implementation("org.virtuslab:pulumi-aws-kotlin:5.29.1.1")
+    implementation("com.pulumi:pulumi:0.9.4")
+    implementation("org.virtuslab:pulumi-aws-kotlin:5.42.0.0")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 }
 
 application {
     mainClass.set(
-        project.findProperty("mainClass") as? String ?: "${group}.MainKt"
+        project.findProperty("mainClass") as? String ?: "$group.MainKt"
     )
 }
