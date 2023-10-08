@@ -1,0 +1,398 @@
+
+
+{
+    "version": 3,
+    "deployment": {
+        "manifest": {
+            "time": "2023-08-14T00:30:45.113234-04:00",
+            "magic": "7f5ec831fbfcaaafb30fe1f9dd0eebc4a62372e9fda10d9bab6256b2deca869d",
+            "version": "v3.78.1"
+        },
+        "secrets_providers": {
+            "type": "service",
+            "state": {
+                "url": "https://api.pulumi.com",
+                "owner": "donkittle",
+                "project": "dmseer-infra",
+                "stack": "dev"
+            }
+        },
+        "resources": [
+            {
+                "urn": "urn:pulumi:dev::dmseer-infra::pulumi:pulumi:Stack::dmseer-infra-dev",
+                "custom": false,
+                "type": "pulumi:pulumi:Stack",
+                "created": "2023-08-14T04:29:37.874765Z",
+                "modified": "2023-08-14T04:29:37.874765Z"
+            },
+            {
+                "urn": "urn:pulumi:dev::dmseer-infra::pulumi:providers:aws::default_5_42_0",
+                "custom": true,
+                "id": "b4b5b775-618d-4536-953b-2df3d2382edb",
+                "type": "pulumi:providers:aws",
+                "inputs": {
+                    "profile": "pulumidev",
+                    "region": "ca-central-1",
+                    "version": "5.42.0"
+                },
+                "outputs": {
+                    "profile": "pulumidev",
+                    "region": "ca-central-1",
+                    "version": "5.42.0"
+                },
+                "created": "2023-08-14T04:29:38.667064Z",
+                "modified": "2023-08-14T04:29:38.667064Z"
+            },
+            {
+                "urn": "urn:pulumi:dev::dmseer-infra::aws:s3/bucket:Bucket::b4b-Dev-website",
+                "custom": true,
+                "id": "b4b-dev-website-94fa531",
+                "type": "aws:s3/bucket:Bucket",
+                "inputs": {
+                    "__defaults": [
+                        "acl",
+                        "bucket",
+                        "forceDestroy"
+                    ],
+                    "acl": "private",
+                    "bucket": "b4b-dev-website-94fa531",
+                    "forceDestroy": false,
+                    "tags": {
+                        "Name": "dev-static-website-bucket",
+                        "__defaults": [],
+                        "env": "Dev"
+                    },
+                    "website": {
+                        "__defaults": [],
+                        "errorDocument": "error.html",
+                        "indexDocument": "index.html"
+                    }
+                },
+                "outputs": {
+                    "accelerationStatus": "",
+                    "acl": "private",
+                    "arn": "arn:aws:s3:::b4b-dev-website-94fa531",
+                    "bucket": "b4b-dev-website-94fa531",
+                    "bucketDomainName": "b4b-dev-website-94fa531.s3.amazonaws.com",
+                    "bucketRegionalDomainName": "b4b-dev-website-94fa531.s3.ca-central-1.amazonaws.com",
+                    "corsRules": [],
+                    "forceDestroy": false,
+                    "grants": [],
+                    "hostedZoneId": "Z1QDHH18159H29",
+                    "id": "b4b-dev-website-94fa531",
+                    "lifecycleRules": [],
+                    "loggings": [],
+                    "objectLockConfiguration": null,
+                    "region": "ca-central-1",
+                    "replicationConfiguration": null,
+                    "requestPayer": "BucketOwner",
+                    "serverSideEncryptionConfiguration": {
+                        "rule": {
+                            "applyServerSideEncryptionByDefault": {
+                                "kmsMasterKeyId": "",
+                                "sseAlgorithm": "AES256"
+                            },
+                            "bucketKeyEnabled": false
+                        }
+                    },
+                    "tags": {
+                        "Name": "dev-static-website-bucket",
+                        "env": "Dev"
+                    },
+                    "tagsAll": {
+                        "Name": "dev-static-website-bucket",
+                        "env": "Dev"
+                    },
+                    "versioning": {
+                        "enabled": false,
+                        "mfaDelete": false
+                    },
+                    "website": {
+                        "errorDocument": "error.html",
+                        "indexDocument": "index.html",
+                        "redirectAllRequestsTo": "",
+                        "routingRules": ""
+                    },
+                    "websiteDomain": "s3-website.ca-central-1.amazonaws.com",
+                    "websiteEndpoint": "b4b-dev-website-94fa531.s3-website.ca-central-1.amazonaws.com"
+                },
+                "parent": "urn:pulumi:dev::dmseer-infra::pulumi:pulumi:Stack::dmseer-infra-dev",
+                "provider": "urn:pulumi:dev::dmseer-infra::pulumi:providers:aws::default_5_42_0::b4b5b775-618d-4536-953b-2df3d2382edb",
+                "propertyDependencies": {
+                    "tags": null,
+                    "website": null
+                },
+                "created": "2023-08-14T04:29:40.638606Z",
+                "modified": "2023-08-14T04:29:40.638606Z"
+            },
+            {
+                "urn": "urn:pulumi:dev::dmseer-infra::aws:s3/bucketOwnershipControls:BucketOwnershipControls::b4b-Dev-website-ownership-controls",
+                "custom": true,
+                "id": "b4b-dev-website-94fa531",
+                "type": "aws:s3/bucketOwnershipControls:BucketOwnershipControls",
+                "inputs": {
+                    "__defaults": [],
+                    "bucket": "b4b-dev-website-94fa531",
+                    "rule": {
+                        "__defaults": [],
+                        "objectOwnership": "BucketOwnerPreferred"
+                    }
+                },
+                "outputs": {
+                    "bucket": "b4b-dev-website-94fa531",
+                    "id": "b4b-dev-website-94fa531",
+                    "rule": {
+                        "objectOwnership": "BucketOwnerPreferred"
+                    }
+                },
+                "parent": "urn:pulumi:dev::dmseer-infra::pulumi:pulumi:Stack::dmseer-infra-dev",
+                "dependencies": [
+                    "urn:pulumi:dev::dmseer-infra::aws:s3/bucket:Bucket::b4b-Dev-website"
+                ],
+                "provider": "urn:pulumi:dev::dmseer-infra::pulumi:providers:aws::default_5_42_0::b4b5b775-618d-4536-953b-2df3d2382edb",
+                "propertyDependencies": {
+                    "bucket": [
+                        "urn:pulumi:dev::dmseer-infra::aws:s3/bucket:Bucket::b4b-Dev-website"
+                    ],
+                    "rule": null
+                },
+                "created": "2023-08-14T04:29:41.287886Z",
+                "modified": "2023-08-14T04:29:41.287886Z"
+            },
+            {
+                "urn": "urn:pulumi:dev::dmseer-infra::aws:s3/bucketPublicAccessBlock:BucketPublicAccessBlock::b4b-Dev-website-public-access-block",
+                "custom": true,
+                "id": "b4b-dev-website-94fa531",
+                "type": "aws:s3/bucketPublicAccessBlock:BucketPublicAccessBlock",
+                "inputs": {
+                    "__defaults": [],
+                    "blockPublicAcls": false,
+                    "blockPublicPolicy": false,
+                    "bucket": "b4b-dev-website-94fa531",
+                    "ignorePublicAcls": false,
+                    "restrictPublicBuckets": false
+                },
+                "outputs": {
+                    "blockPublicAcls": false,
+                    "blockPublicPolicy": false,
+                    "bucket": "b4b-dev-website-94fa531",
+                    "id": "b4b-dev-website-94fa531",
+                    "ignorePublicAcls": false,
+                    "restrictPublicBuckets": false
+                },
+                "parent": "urn:pulumi:dev::dmseer-infra::pulumi:pulumi:Stack::dmseer-infra-dev",
+                "dependencies": [
+                    "urn:pulumi:dev::dmseer-infra::aws:s3/bucket:Bucket::b4b-Dev-website"
+                ],
+                "provider": "urn:pulumi:dev::dmseer-infra::pulumi:providers:aws::default_5_42_0::b4b5b775-618d-4536-953b-2df3d2382edb",
+                "propertyDependencies": {
+                    "blockPublicAcls": null,
+                    "blockPublicPolicy": null,
+                    "bucket": [
+                        "urn:pulumi:dev::dmseer-infra::aws:s3/bucket:Bucket::b4b-Dev-website"
+                    ],
+                    "ignorePublicAcls": null,
+                    "restrictPublicBuckets": null
+                },
+                "created": "2023-08-14T04:29:41.466202Z",
+                "modified": "2023-08-14T04:29:41.466202Z"
+            },
+            {
+                "urn": "urn:pulumi:dev::dmseer-infra::aws:s3/bucketAclV2:BucketAclV2::b4b-Dev-website-public-acl",
+                "custom": true,
+                "id": "b4b-dev-website-94fa531,public-read",
+                "type": "aws:s3/bucketAclV2:BucketAclV2",
+                "inputs": {
+                    "__defaults": [],
+                    "acl": "public-read",
+                    "bucket": "b4b-dev-website-94fa531"
+                },
+                "outputs": {
+                    "accessControlPolicy": {
+                        "grants": [
+                            {
+                                "grantee": {
+                                    "displayName": "",
+                                    "emailAddress": "",
+                                    "id": "",
+                                    "type": "Group",
+                                    "uri": "http://acs.amazonaws.com/groups/global/AllUsers"
+                                },
+                                "permission": "READ"
+                            },
+                            {
+                                "grantee": {
+                                    "displayName": "",
+                                    "emailAddress": "",
+                                    "id": "e8ce97f79873979a0ba697583a1edee00845d78c850b3d8cb9b2a84a577c37c1",
+                                    "type": "CanonicalUser",
+                                    "uri": ""
+                                },
+                                "permission": "FULL_CONTROL"
+                            }
+                        ],
+                        "owner": {
+                            "displayName": "",
+                            "id": "e8ce97f79873979a0ba697583a1edee00845d78c850b3d8cb9b2a84a577c37c1"
+                        }
+                    },
+                    "acl": "public-read",
+                    "bucket": "b4b-dev-website-94fa531",
+                    "expectedBucketOwner": "",
+                    "id": "b4b-dev-website-94fa531,public-read"
+                },
+                "parent": "urn:pulumi:dev::dmseer-infra::pulumi:pulumi:Stack::dmseer-infra-dev",
+                "dependencies": [
+                    "urn:pulumi:dev::dmseer-infra::aws:s3/bucketPublicAccessBlock:BucketPublicAccessBlock::b4b-Dev-website-public-access-block",
+                    "urn:pulumi:dev::dmseer-infra::aws:s3/bucketOwnershipControls:BucketOwnershipControls::b4b-Dev-website-ownership-controls",
+                    "urn:pulumi:dev::dmseer-infra::aws:s3/bucket:Bucket::b4b-Dev-website"
+                ],
+                "provider": "urn:pulumi:dev::dmseer-infra::pulumi:providers:aws::default_5_42_0::b4b5b775-618d-4536-953b-2df3d2382edb",
+                "propertyDependencies": {
+                    "acl": null,
+                    "bucket": [
+                        "urn:pulumi:dev::dmseer-infra::aws:s3/bucket:Bucket::b4b-Dev-website"
+                    ]
+                },
+                "created": "2023-08-14T04:29:42.002936Z",
+                "modified": "2023-08-14T04:29:42.002936Z"
+            },
+            {
+                "urn": "urn:pulumi:dev::dmseer-infra::aws:ec2/vpc:Vpc::dev_vpc",
+                "custom": true,
+                "id": "vpc-06d404b4c43c0b8bb",
+                "type": "aws:ec2/vpc:Vpc",
+                "inputs": {
+                    "__defaults": [
+                        "instanceTenancy"
+                    ],
+                    "cidrBlock": "10.10.0.0/16",
+                    "enableDnsHostnames": true,
+                    "enableDnsSupport": true,
+                    "instanceTenancy": "default",
+                    "tags": {
+                        "Name": "dev-vpc",
+                        "__defaults": [],
+                        "env": "Dev"
+                    }
+                },
+                "outputs": {
+                    "__meta": "{\"schema_version\":\"1\"}",
+                    "arn": "arn:aws:ec2:ca-central-1:814245790557:vpc/vpc-06d404b4c43c0b8bb",
+                    "assignGeneratedIpv6CidrBlock": false,
+                    "cidrBlock": "10.10.0.0/16",
+                    "defaultNetworkAclId": "acl-02e9c88531f972a4e",
+                    "defaultRouteTableId": "rtb-0a0044d7f0c0611eb",
+                    "defaultSecurityGroupId": "sg-06ae9b73dc0a1bf6c",
+                    "dhcpOptionsId": "dopt-096d01ebbd3ff60d1",
+                    "enableClassiclink": false,
+                    "enableClassiclinkDnsSupport": false,
+                    "enableDnsHostnames": true,
+                    "enableDnsSupport": true,
+                    "enableNetworkAddressUsageMetrics": false,
+                    "id": "vpc-06d404b4c43c0b8bb",
+                    "instanceTenancy": "default",
+                    "ipv6AssociationId": "",
+                    "ipv6CidrBlock": "",
+                    "ipv6CidrBlockNetworkBorderGroup": "",
+                    "ipv6IpamPoolId": "",
+                    "ipv6NetmaskLength": 0,
+                    "mainRouteTableId": "rtb-0a0044d7f0c0611eb",
+                    "ownerId": "814245790557",
+                    "tags": {
+                        "Name": "dev-vpc",
+                        "env": "Dev"
+                    },
+                    "tagsAll": {
+                        "Name": "dev-vpc",
+                        "env": "Dev"
+                    }
+                },
+                "parent": "urn:pulumi:dev::dmseer-infra::pulumi:pulumi:Stack::dmseer-infra-dev",
+                "provider": "urn:pulumi:dev::dmseer-infra::pulumi:providers:aws::default_5_42_0::b4b5b775-618d-4536-953b-2df3d2382edb",
+                "propertyDependencies": {
+                    "cidrBlock": null,
+                    "enableDnsHostnames": null,
+                    "enableDnsSupport": null,
+                    "tags": null
+                },
+                "created": "2023-08-14T04:29:50.673382Z",
+                "modified": "2023-08-14T04:29:50.673382Z"
+            },
+            {
+                "urn": "urn:pulumi:dev::dmseer-infra::aws:ec2/subnet:Subnet::dev_private_subnet",
+                "custom": true,
+                "id": "subnet-00c419660b1d10e54",
+                "type": "aws:ec2/subnet:Subnet",
+                "inputs": {
+                    "__defaults": [
+                        "assignIpv6AddressOnCreation",
+                        "enableDns64",
+                        "enableResourceNameDnsARecordOnLaunch",
+                        "enableResourceNameDnsAaaaRecordOnLaunch",
+                        "ipv6Native"
+                    ],
+                    "assignIpv6AddressOnCreation": false,
+                    "cidrBlock": "10.10.20.0/24",
+                    "enableDns64": false,
+                    "enableResourceNameDnsARecordOnLaunch": false,
+                    "enableResourceNameDnsAaaaRecordOnLaunch": false,
+                    "ipv6Native": false,
+                    "mapPublicIpOnLaunch": false,
+                    "tags": {
+                        "Name": "dev-private-subnet",
+                        "__defaults": [],
+                        "env": "Dev"
+                    },
+                    "vpcId": "vpc-06d404b4c43c0b8bb"
+                },
+                "outputs": {
+                    "__meta": "{\"e2bfb730-ecaa-11e6-8f88-34363bc7c4c0\":{\"create\":600000000000,\"delete\":1200000000000},\"schema_version\":\"1\"}",
+                    "arn": "arn:aws:ec2:ca-central-1:814245790557:subnet/subnet-00c419660b1d10e54",
+                    "assignIpv6AddressOnCreation": false,
+                    "availabilityZone": "ca-central-1a",
+                    "availabilityZoneId": "cac1-az1",
+                    "cidrBlock": "10.10.20.0/24",
+                    "customerOwnedIpv4Pool": "",
+                    "enableDns64": false,
+                    "enableLniAtDeviceIndex": 0,
+                    "enableResourceNameDnsARecordOnLaunch": false,
+                    "enableResourceNameDnsAaaaRecordOnLaunch": false,
+                    "id": "subnet-00c419660b1d10e54",
+                    "ipv6CidrBlock": "",
+                    "ipv6CidrBlockAssociationId": "",
+                    "ipv6Native": false,
+                    "mapCustomerOwnedIpOnLaunch": false,
+                    "mapPublicIpOnLaunch": false,
+                    "outpostArn": "",
+                    "ownerId": "814245790557",
+                    "privateDnsHostnameTypeOnLaunch": "ip-name",
+                    "tags": {
+                        "Name": "dev-private-subnet",
+                        "env": "Dev"
+                    },
+                    "tagsAll": {
+                        "Name": "dev-private-subnet",
+                        "env": "Dev"
+                    },
+                    "vpcId": "vpc-06d404b4c43c0b8bb"
+                },
+                "parent": "urn:pulumi:dev::dmseer-infra::pulumi:pulumi:Stack::dmseer-infra-dev",
+                "dependencies": [
+                    "urn:pulumi:dev::dmseer-infra::aws:ec2/vpc:Vpc::dev_vpc"
+                ],
+                "provider": "urn:pulumi:dev::dmseer-infra::pulumi:providers:aws::default_5_42_0::b4b5b775-618d-4536-953b-2df3d2382edb",
+                "propertyDependencies": {
+                    "cidrBlock": null,
+                    "mapPublicIpOnLaunch": null,
+                    "tags": null,
+                    "vpcId": [
+                        "urn:pulumi:dev::dmseer-infra::aws:ec2/vpc:Vpc::dev_vpc"
+                    ]
+                },
+                "created": "2023-08-14T04:29:51.361854Z",
+                "modified": "2023-08-14T04:29:51.361854Z"
+            }
+        ]
+    }
+}
