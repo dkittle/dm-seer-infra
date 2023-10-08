@@ -29,7 +29,10 @@ fun run(ctx: Context) {
         val env = Stack.valueOf(ctx.stackName().replaceFirstChar { it.uppercase() })
         val vpc = environmentVpc(env)
         val privateSubnet = privateSubnet(env, vpc)
+        val b4bdevCert = b4bdevCertificate(env)
         val staticWebsite = staticWebsite(env)
         val websitePolicy = secureStaticWebsite(env, staticWebsite)
+        val cdn = staticWebsiteCdn(env, staticWebsite, b4bdevCert)
     }
 }
+

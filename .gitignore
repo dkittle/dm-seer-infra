@@ -4,3 +4,6 @@
 build/
 target/
 !gradle/wrapper/gradle-wrapper.jar
+
+www/index.html
+www/error.html

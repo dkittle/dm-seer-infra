@@ -1,6 +1,11 @@
 package ca.kittle
 
+import com.pulumi.aws.appsync.kotlin.type
+import com.pulumi.aws.memorydb.kotlin.acl
+import com.pulumi.aws.quicksight.kotlin.folder
 import com.pulumi.aws.s3.kotlin.*
+import com.pulumi.aws.s3.kotlin.bucket
+
 
 suspend fun staticWebsite(env: Stack): Bucket =
     bucket("b4b-${env.name}-website") {
@@ -28,6 +33,7 @@ suspend fun secureStaticWebsite(env: Stack, source: Bucket) {
             ignorePublicAcls(false)
             restrictPublicBuckets(false)
         }
+//        type("aws:s3:BucketPublicAccessBlock")
     }
     val publicBucketAcl = bucketAclV2("b4b-${env.name}-website-public-acl") {
         args {
@@ -38,25 +44,11 @@ suspend fun secureStaticWebsite(env: Stack, source: Bucket) {
             dependsOn(ownerControls, publicAccessBlock)
         }
     }
+
 //    val bucketPolicy = bucketPolicy("b4b-${env.name}-website-policy") {
 //        args {
 //            bucket(source.id)
-//            policy(
-//                """
-//                {
-//                    "Version": "2012-10-17",
-//                    "Statement": [
-//                        {
-//                            "Sid": "PublicReadGetObject",
-//                            "Effect": "Allow",
-//                            "Principal": "*",
-//                            "Action": "s3:GetObject",
-//                            "Resource": "${source.arn}/*"
-//                        }
-//                    ]
-//                }
-//                """.trimIndent()
-//            )
+//            policy("{\"Version\": \"2012-10-17\", \"Statement\": [{ \"Sid\": \"PublicReadGetObject\", \"Effect\": \"Allow\", \"Principal\": \"*\", \"Action\": \"s3:GetObject\", \"Resource\": \"arn:aws:s3:::b4b-dev-website-7c6ace2/*\" }]}") // ktlint-disable max-line-length
 //        }
 //    }
 }
