@@ -1,7 +1,8 @@
-package ca.kittle
+package ca.kittle.core
 
+import ca.kittle.Stack
+import ca.kittle.envTags
 import com.pulumi.aws.acm.kotlin.certificate
-import com.pulumi.aws.appsync.kotlin.domainName
 
 
 /**

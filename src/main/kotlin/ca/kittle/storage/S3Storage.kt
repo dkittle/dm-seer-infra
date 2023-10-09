@@ -1,8 +1,7 @@
-package ca.kittle
+package ca.kittle.storage
 
-import com.pulumi.aws.appsync.kotlin.type
-import com.pulumi.aws.memorydb.kotlin.acl
-import com.pulumi.aws.quicksight.kotlin.folder
+import ca.kittle.Stack
+import ca.kittle.envTags
 import com.pulumi.aws.s3.kotlin.*
 import com.pulumi.aws.s3.kotlin.bucket
 
@@ -33,22 +32,17 @@ suspend fun secureStaticWebsite(env: Stack, source: Bucket) {
             ignorePublicAcls(false)
             restrictPublicBuckets(false)
         }
-//        type("aws:s3:BucketPublicAccessBlock")
     }
-    val publicBucketAcl = bucketAclV2("b4b-${env.name}-website-public-acl") {
+
+    val bucketPolicyJson = source.arn.applyValue(fun(arn: String): String {
+        return "{\"Version\": \"2012-10-17\", \"Statement\": [{ \"Sid\": \"PublicReadGetObject\", \"Effect\": \"Allow\", \"Principal\": \"*\", \"Action\": \"s3:GetObject\", \"Resource\": \"${arn}/*\" }]}";
+    })
+
+    val bucketPolicy = bucketPolicy("b4b-${env.name}-website-policy") {
         args {
             bucket(source.id)
-            acl("public-read")
-        }
-        opts {
-            dependsOn(ownerControls, publicAccessBlock)
+            policy(bucketPolicyJson)
         }
     }
 
-//    val bucketPolicy = bucketPolicy("b4b-${env.name}-website-policy") {
-//        args {
-//            bucket(source.id)
-//            policy("{\"Version\": \"2012-10-17\", \"Statement\": [{ \"Sid\": \"PublicReadGetObject\", \"Effect\": \"Allow\", \"Principal\": \"*\", \"Action\": \"s3:GetObject\", \"Resource\": \"arn:aws:s3:::b4b-dev-website-7c6ace2/*\" }]}") // ktlint-disable max-line-length
-//        }
-//    }
 }

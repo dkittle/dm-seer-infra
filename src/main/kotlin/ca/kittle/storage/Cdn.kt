@@ -1,11 +1,18 @@
-package ca.kittle
+package ca.kittle.storage
 
+import ca.kittle.Stack
+import ca.kittle.envTags
 import com.pulumi.aws.acm.kotlin.Certificate
+import com.pulumi.aws.cloudfront.kotlin.Distribution
 import com.pulumi.aws.cloudfront.kotlin.distribution
 import com.pulumi.aws.s3.kotlin.Bucket
 
-suspend fun staticWebsiteCdn(env: Stack, bucket: Bucket, cert: Certificate) =
-    distribution("b4b-${env.name}-website-cdn") {
+
+suspend fun staticWebsiteCdn(env: Stack, bucket: Bucket, cert: Certificate): Distribution {
+    val certificateArn = cert.arn.applyValue(fun(arn: String): String { return arn })
+    val bucketArn = bucket.arn.applyValue(fun(arn: String): String { return arn })
+    val bucketWebsite = bucket.websiteEndpoint.applyValue(fun(website: String): String { return website })
+    return distribution("b4b-${env.name}-website-cdn") {
         args {
             customErrorResponses {
                 errorCode(404)
@@ -19,7 +26,7 @@ suspend fun staticWebsiteCdn(env: Stack, bucket: Bucket, cert: Certificate) =
                 defaultTtl(600)
                 maxTtl(600)
                 minTtl(600)
-                targetOriginId(bucket.arn)
+                targetOriginId(bucketArn)
                 viewerProtocolPolicy("redirect-to-https")
                 forwardedValues {
                     cookies {
@@ -36,10 +43,10 @@ suspend fun staticWebsiteCdn(env: Stack, bucket: Bucket, cert: Certificate) =
                     httpPort(80)
                     httpsPort(443)
                     originProtocolPolicy("http-only")
-                    originSslProtocols("TLSv1.2")
+                    originSslProtocols("TLSv1.2_2021")
                 }
-                domainName(bucket.websiteEndpoint)
-                originId(bucket.arn)
+                domainName(bucketWebsite)
+                originId(bucketArn)
             }
             priceClass("PriceClass_100")
             restrictions {
@@ -49,9 +56,10 @@ suspend fun staticWebsiteCdn(env: Stack, bucket: Bucket, cert: Certificate) =
             }
             viewerCertificate {
                 cloudfrontDefaultCertificate(false)
-                acmCertificateArn(cert.arn)
+                acmCertificateArn("arn:aws:acm:us-east-1:814245790557:certificate/af13b62d-ce6b-4da6-9b21-b158bddfd535")
                 sslSupportMethod("sni-only")
             }
             tags(envTags(env, "static-website-cdn"))
         }
     }
+}

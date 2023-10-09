@@ -1,5 +1,7 @@
-package ca.kittle
+package ca.kittle.network
 
+import ca.kittle.Stack
+import ca.kittle.envTags
 import com.pulumi.aws.ec2.kotlin.Vpc
 import com.pulumi.aws.ec2.kotlin.securityGroup
 import com.pulumi.aws.ec2.kotlin.subnet
