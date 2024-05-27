@@ -1,3 +1,5 @@
 config:
   aws:profile: pulumiprod
   aws:region: ca-central-1
+  dmseer-infra:env: prod
+  dmseer-infra:fqdn: www.buddies4baddies.com

@@ -37,13 +37,13 @@ suspend fun staticWebsiteCdn(env: Stack, bucket: Bucket, cert: Certificate): Dis
             }
             enabled(true)
             defaultRootObject("index.html")
-            aliases("${env.name.lowercase()}.b4bdev.com")
+            aliases("b4bdev.com", "www.b4bdev.com")
             origins {
                 customOriginConfig {
                     httpPort(80)
                     httpsPort(443)
                     originProtocolPolicy("http-only")
-                    originSslProtocols("TLSv1.2_2021")
+                    originSslProtocols("TLSv1.2")
                 }
                 domainName(bucketWebsite)
                 originId(bucketArn)
