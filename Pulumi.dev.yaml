@@ -2,5 +2,5 @@ config:
   aws:profile: pulumidev
   aws:region: ca-central-1
   dmseer-infra:env: dev
-  dmseer-infra:fqdn: www.b4bdev.com
+  dmseer-infra:fqdn: dev.quillndice.com
 

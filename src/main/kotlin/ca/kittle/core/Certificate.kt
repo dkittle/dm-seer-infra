@@ -25,21 +25,21 @@ var cert = new Certificate("cert", CertificateArgs.builder()
 
  */
 
-suspend fun b4bdevCertificate(env: Stack) =
-    certificate("b4bdev-${env.name.lowercase()}-certificate") {
+suspend fun qndCertificate(env: Stack) =
+    certificate("qnd-${env.name.lowercase()}-certificate") {
         args {
-            domainName("*.b4bdev.com")
+            domainName("*.quillndice.com")
             keyAlgorithm("RSA_2048")
-            options {
-                certificateTransparencyLoggingPreference("DISABLED")
-            }
-            subjectAlternativeNames("*.b4bdev.com", "b4bdev.com")
+//            options {
+//                certificateTransparencyLoggingPreference("DISABLED")
+//            }
+            subjectAlternativeNames("*.quillndice.com", "quillndice.com")
             validationMethod("DNS")
-            validationOptions {
-                domainName("b4bdev.com")
-                validationDomain("b4bdev.com")
-            }
-            tags(envTags(env, "b4bdev-cert"))
+//            validationOptions {
+//                domainName("b4bdev.com")
+//                validationDomain("b4bdev.com")
+//            }
+            tags(envTags(env, "qnd-cert"))
         }
         opts {
             retainOnDelete(true)

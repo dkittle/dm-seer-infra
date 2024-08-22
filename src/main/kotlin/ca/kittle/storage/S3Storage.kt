@@ -7,7 +7,7 @@ import com.pulumi.aws.s3.kotlin.bucket
 
 
 suspend fun staticWebsite(env: Stack): Bucket =
-    bucket("b4b-${env.name.lowercase()}-website") {
+    bucket("qnd-${env.name.lowercase()}-website") {
         args {
             website {
                 indexDocument("index.html")
@@ -30,13 +30,13 @@ suspend fun staticWebsite(env: Stack): Bucket =
 suspend fun secureStaticWebsite(env: Stack, source: Bucket) {
     val sourceId = source.id.applyValue(fun(id: String): String { return id })
 
-    val ownerControls = bucketOwnershipControls("b4b-${env.name.lowercase()}-website-ownership-controls") {
+    val ownerControls = bucketOwnershipControls("qnd-${env.name.lowercase()}-website-ownership-controls") {
         args {
             bucket(sourceId)
             rule { objectOwnership("BucketOwnerPreferred") }
         }
     }
-    val publicAccessBlock = bucketPublicAccessBlock("b4b-${env.name.lowercase()}-website-public-access-block") {
+    val publicAccessBlock = bucketPublicAccessBlock("qnd-${env.name.lowercase()}-website-public-access-block") {
         args {
             bucket(sourceId)
             blockPublicAcls(false)
@@ -46,7 +46,7 @@ suspend fun secureStaticWebsite(env: Stack, source: Bucket) {
         }
     }
 
-    val publicAccessControl = bucketAclV2("b4b-${env.name.lowercase()}-website-public-access-block") {
+    val publicAccessControl = bucketAclV2("qnd-${env.name.lowercase()}-website-public-access-block") {
         args {
             bucket(sourceId)
             acl("public-read")
@@ -57,7 +57,7 @@ suspend fun secureStaticWebsite(env: Stack, source: Bucket) {
         return "{\"Version\": \"2012-10-17\", \"Statement\": [{ \"Sid\": \"PublicReadGetObject\", \"Effect\": \"Allow\", \"Principal\": \"*\", \"Action\": \"s3:GetObject\", \"Resource\": \"${arn}/*\" }]}";
     })
 
-    val bucketPolicy = bucketPolicy("b4b-${env.name.lowercase()}-website-policy") {
+    val bucketPolicy = bucketPolicy("qnd-${env.name.lowercase()}-website-policy") {
         args {
             bucket(sourceId)
             policy(bucketPolicyJson)

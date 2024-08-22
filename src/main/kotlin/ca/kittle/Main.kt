@@ -2,10 +2,8 @@ package ca.kittle
 
 import ca.kittle.cluster.containerRegistry
 import ca.kittle.cluster.cluster
-import ca.kittle.core.b4bdevCertificate
-import ca.kittle.network.domainRecord
-import ca.kittle.network.environmentVpc
-import ca.kittle.network.privateSubnet
+import ca.kittle.core.qndCertificate
+import ca.kittle.network.*
 import ca.kittle.security.SecurityGroupContext
 import ca.kittle.security.inboundSecurityGroup
 import ca.kittle.storage.mongoCluster
@@ -23,8 +21,6 @@ const val DOMAIN_NAME_KEY = "fqdn"
 
 fun main() {
     Pulumi.run(::run)
-//    Pulumi.run { ctx ->
-//    }
 }
 
 enum class Stack {
@@ -48,10 +44,12 @@ fun run(ctx: Context) {
 
         val vpc = environmentVpc(env)
         val privateSubnet = privateSubnet(env, vpc)
-        val b4bdevCert = b4bdevCertificate(env)
+        val privateSubnet2 = privateSubnet2(env, vpc)
+        val subnetGroup = privateSubnetGroup(env, privateSubnet, privateSubnet2)
+        val qndCert = qndCertificate(env)
         val staticWebsite = staticWebsite(env)
         val websitePolicy = secureStaticWebsite(env, staticWebsite)
-        val cdn = staticWebsiteCdn(env, staticWebsite, b4bdevCert)
+        val cdn = staticWebsiteCdn(env, staticWebsite, qndCert)
         val devDomain = domainRecord(env, cdn)
 
         val containerRegistry: String = containerRegistry(env)
@@ -67,7 +65,7 @@ fun run(ctx: Context) {
             )
         )
 
-        val mongo = mongoCluster(env, "mongo", mongoSG)
+        val mongo = mongoCluster(env, "mongo", mongoSG, subnetGroup)
         ctx.export("service domain name", fqdn)
         ctx.export("container registry url", containerRegistry)
         ctx.export("cluster urn", cluster.urn)

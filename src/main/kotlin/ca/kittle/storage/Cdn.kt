@@ -12,7 +12,7 @@ suspend fun staticWebsiteCdn(env: Stack, bucket: Bucket, cert: Certificate): Dis
     val certificateArn = cert.arn.applyValue(fun(arn: String): String { return arn })
     val bucketArn = bucket.arn.applyValue(fun(arn: String): String { return arn })
     val bucketWebsite = bucket.websiteEndpoint.applyValue(fun(website: String): String { return website })
-    return distribution("b4b-${env.name}-website-cdn") {
+    return distribution("qnd-${env.name.lowercase()}-website-cdn") {
         args {
             customErrorResponses {
                 errorCode(404)
@@ -37,7 +37,7 @@ suspend fun staticWebsiteCdn(env: Stack, bucket: Bucket, cert: Certificate): Dis
             }
             enabled(true)
             defaultRootObject("index.html")
-            aliases("b4bdev.com", "www.b4bdev.com")
+            aliases("dev.quillndice.com")
             origins {
                 customOriginConfig {
                     httpPort(80)
@@ -56,7 +56,7 @@ suspend fun staticWebsiteCdn(env: Stack, bucket: Bucket, cert: Certificate): Dis
             }
             viewerCertificate {
                 cloudfrontDefaultCertificate(false)
-                acmCertificateArn("arn:aws:acm:us-east-1:814245790557:certificate/af13b62d-ce6b-4da6-9b21-b158bddfd535")
+                acmCertificateArn("arn:aws:acm:us-east-1:814245790557:certificate/c0469e32-9ebb-4fe1-8552-f0c61036756d")
                 sslSupportMethod("sni-only")
             }
             tags(envTags(env, "static-website-cdn"))

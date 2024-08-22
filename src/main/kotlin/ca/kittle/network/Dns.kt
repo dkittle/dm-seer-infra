@@ -8,9 +8,9 @@ import com.pulumi.aws.route53.kotlin.record
 
 private fun domainNames(env: Stack): Pair<String, String> =
     when (env) {
-        Stack.Dev -> Pair("www.b4bdev.com", "Z00947551AE5IBY3A9TMV")
-        Stack.Staging -> Pair("www.b4bstage.com", "Z00947551AE5IBY3A9TMV")
-        Stack.Prod -> Pair("www.buddies4baddies.com", "Z00947551AE5IBY3A9TMV")
+        Stack.Dev -> Pair("dev.quillndice.com", "Z00947551AE5IBY3A9TMV")
+        Stack.Staging -> Pair("stage.quillndice.com", "Z00947551AE5IBY3A9TMV")
+        Stack.Prod -> Pair("quillndice.com", "Z00947551AE5IBY3A9TMV")
     }
 
 
