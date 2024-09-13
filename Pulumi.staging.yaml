@@ -2,4 +2,4 @@ config:
   aws:profile: pulumistaging
   aws:region: ca-central-1
   dmseer-infra:env: staging
-  dmseer-infra:fqdn: www.b4bdev.com
+  dmseer-infra:fqdn: staging.dmseer.quillndice.com

@@ -2,6 +2,7 @@ package ca.kittle.core
 
 import ca.kittle.Stack
 import ca.kittle.envTags
+import com.pulumi.aws.acm.kotlin.Certificate
 import com.pulumi.aws.acm.kotlin.certificate
 
 
@@ -25,20 +26,13 @@ var cert = new Certificate("cert", CertificateArgs.builder()
 
  */
 
-suspend fun qndCertificate(env: Stack) =
+suspend fun qndCertificate(env: Stack): Certificate =
     certificate("qnd-${env.name.lowercase()}-certificate") {
         args {
             domainName("*.quillndice.com")
             keyAlgorithm("RSA_2048")
-//            options {
-//                certificateTransparencyLoggingPreference("DISABLED")
-//            }
             subjectAlternativeNames("*.quillndice.com", "quillndice.com")
             validationMethod("DNS")
-//            validationOptions {
-//                domainName("b4bdev.com")
-//                validationDomain("b4bdev.com")
-//            }
             tags(envTags(env, "qnd-cert"))
         }
         opts {
