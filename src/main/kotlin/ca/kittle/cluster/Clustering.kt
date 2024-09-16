@@ -2,7 +2,6 @@ package ca.kittle.cluster
 
 import ca.kittle.Stack
 import ca.kittle.envTags
-import com.pulumi.aws.ecs.inputs.ClusterSettingArgs
 import com.pulumi.aws.ecs.kotlin.Cluster
 import com.pulumi.aws.ecs.kotlin.cluster
 
@@ -12,9 +11,9 @@ import com.pulumi.aws.ecs.kotlin.cluster
 
 
 suspend fun createCluster(env: Stack): Cluster {
-    return cluster("${env.stackEnv}-dmseer-ecs-cluster") {
+    return cluster("${env.stackName}-dmseer-ecs-cluster") {
         args {
-            name("${env.stackEnv}-dmseer-ecs-cluster")
+            name("${env.stackName}-dmseer-ecs-cluster")
             tags(envTags(env, "${env.name.lowercase()}-dmseer-ecs-cluster"))
         }
     }

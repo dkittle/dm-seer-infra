@@ -1,7 +1,6 @@
 package ca.kittle.compute
 
 import ca.kittle.Stack
-import ca.kittle.envTags
 import com.pulumi.aws.autoscaling.kotlin.Group
 import com.pulumi.aws.autoscaling.kotlin.group
 import com.pulumi.aws.ec2.kotlin.SecurityGroup
@@ -16,12 +15,12 @@ suspend fun createAutoScalingGroup(env: Stack, targetGroup: TargetGroup, ecsSecu
     val securityGroupId = ecsSecurityGroup.id.applyValue(fun(name: String): String { return name })
     val subnet1Id = subnet1.id.applyValue(fun(name: String): String { return name })
     val subnet2Id = subnet2.id.applyValue(fun(name: String): String { return name })
-    val clusterScript = "#!/bin/bash\necho ECS_CLUSTER=${env.stackEnv}-dmseer-ecs-cluster >> /etc/ecs/ecs.config"
+    val clusterScript = "#!/bin/bash\necho ECS_CLUSTER=${env.stackName}-dmseer-ecs-cluster >> /etc/ecs/ecs.config"
     val userData = Base64.Default.encode(clusterScript.encodeToByteArray())
 
-    val launchTemplate = launchTemplate("${env.stackEnv}-dmseer-launch-template") {
+    val launchTemplate = launchTemplate("${env.stackName}-dmseer-launch-template") {
         args {
-            namePrefix("${env.stackEnv}-dmseer")
+            namePrefix("${env.stackName}-dmseer")
 //            imageId("ami-07e35c3920b92d884")
             imageId("ami-08e93cdd76c56b968")
             instanceType("t2.small")
