@@ -83,16 +83,6 @@ suspend fun createFGTaskDefinition(env: Stack, taskExecutionRole: Role): TaskDef
                             }
                         ],
                         "essential": true,
-                        "healthCheck": {
-                            "retries": 3,
-                            "command": [
-                              "\"CMD-SHELL\"",
-                              "\"curl -f http://localhost:8081/ || exit 1\""
-                            ],
-                            "timeout": 5,
-                            "interval": 30,
-                            "startPeriod": 30
-                        },
                         "secrets": [{
                             "name": "MONGO_HOST",
                             "valueFrom": "arn:aws:ssm:ca-central-1:814245790557:parameter/shared-config/${env.stackName}/mongodb/host"                        
