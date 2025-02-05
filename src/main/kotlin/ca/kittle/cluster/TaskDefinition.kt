@@ -17,7 +17,7 @@ suspend fun createTaskDefinition(env: Stack, taskExecutionRole: Role): TaskDefin
                 [
                     {
                         "name": "dmseer-app-${env.stackName}",
-                        "image": "814245790557.dkr.ecr.ca-central-1.amazonaws.com/prod-dmseer-repository-599273a/latest",
+                        "image": "814245790557.dkr.ecr.ca-central-1.amazonaws.com/prod-container-repository-a6bf986",
                         "memory": 800,
                         "portMappings": [
                             {
@@ -26,17 +26,14 @@ suspend fun createTaskDefinition(env: Stack, taskExecutionRole: Role): TaskDefin
                             }
                         ],
                         "secrets": [{
-                            "name": "MONGO_HOST",
-                            "valueFrom": "arn:aws:ssm:ca-central-1:814245790557:parameter/shared-config/${env.stackName}/mongodb/host"                        
+                            "name": "POSTGRES_HOST",
+                            "valueFrom": "arn:aws:ssm:ca-central-1:814245790557:parameter/shared-config/${env.stackName}/postgres/host"                        
                         },{
-                            "name": "MONGO_USER",
-                            "valueFrom": "arn:aws:ssm:ca-central-1:814245790557:parameter/shared-config/${env.stackName}/mongodb/username"                        
+                            "name": "POSTGRES_USER",
+                            "valueFrom": "arn:aws:ssm:ca-central-1:814245790557:parameter/shared-config/${env.stackName}/postgres/username"                        
                         },{
-                            "name": "MONGO_PASSWORD",
-                            "valueFrom": "arn:aws:ssm:ca-central-1:814245790557:secret/shared-config/${env.stackName}/mongodb/password"                        
-                        },{
-                            "name": "TRUSTSTORE_PASSWORD",
-                            "valueFrom": "arn:aws:ssm:ca-central-1:814245790557:secret/shared-config/${env.stackName}/mongodb/truststore_password"                        
+                            "name": "POSTGRES_PASSWORD",
+                            "valueFrom": "arn:aws:ssm:ca-central-1:814245790557:secret/shared-config/${env.stackName}/postgres/password"                        
                         }]
                     }
                 ]
@@ -64,7 +61,7 @@ suspend fun createFGTaskDefinition(env: Stack, taskExecutionRole: Role): TaskDef
                 [
                     {
                         "name": "dmseer-app-${env.stackName}",
-                        "image": "814245790557.dkr.ecr.ca-central-1.amazonaws.com/prod-container-repository-03574f0",
+                        "image": "814245790557.dkr.ecr.ca-central-1.amazonaws.com/prod-container-repository-a6bf986",
                         "cpu": 512,
                         "memory": 960,
                         "logConfiguration": {
@@ -84,17 +81,14 @@ suspend fun createFGTaskDefinition(env: Stack, taskExecutionRole: Role): TaskDef
                         ],
                         "essential": true,
                         "secrets": [{
-                            "name": "MONGO_HOST",
-                            "valueFrom": "arn:aws:ssm:ca-central-1:814245790557:parameter/shared-config/${env.stackName}/mongodb/host"                        
+                            "name": "POSTGRES_HOST",
+                            "valueFrom": "arn:aws:ssm:ca-central-1:814245790557:parameter/shared-config/${env.stackName}/postgres/host"                        
                         },{
-                            "name": "MONGO_USER",
-                            "valueFrom": "arn:aws:ssm:ca-central-1:814245790557:parameter/shared-config/${env.stackName}/mongodb/username"                        
+                            "name": "POSTGRES_USERNAME",
+                            "valueFrom": "arn:aws:ssm:ca-central-1:814245790557:parameter/shared-config/${env.stackName}/postgres/dmseer/user/username"                        
                         },{
-                            "name": "MONGO_PASSWORD",
-                            "valueFrom": "arn:aws:ssm:ca-central-1:814245790557:parameter/shared-config/${env.stackName}/mongodb/password"                        
-                        },{
-                            "name": "TRUSTSTORE_PASSWORD",
-                            "valueFrom": "arn:aws:ssm:ca-central-1:814245790557:parameter/shared-config/${env.stackName}/mongodb/truststore_password"                        
+                            "name": "POSTGRES_PASSWORD",
+                            "valueFrom": "arn:aws:ssm:ca-central-1:814245790557:parameter/shared-config/${env.stackName}/postgres/dmseer/user/password"                        
                         },{
                             "name": "ADMIN_USERNAME",
                             "valueFrom": "arn:aws:ssm:ca-central-1:814245790557:parameter/shared-config/${env.stackName}/dmseer/admin_username"                        

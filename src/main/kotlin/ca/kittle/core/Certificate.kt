@@ -2,6 +2,7 @@ package ca.kittle.core
 
 import ca.kittle.Stack
 import ca.kittle.envTags
+import com.pulumi.aws.acm.Certificate.get
 import com.pulumi.aws.acm.kotlin.Certificate
 import com.pulumi.aws.acm.kotlin.certificate
 
@@ -31,7 +32,7 @@ suspend fun qndCertificate(env: Stack): Certificate =
         args {
             domainName("*.quillndice.com")
             keyAlgorithm("RSA_2048")
-            subjectAlternativeNames("*.quillndice.com", "quillndice.com")
+//            subjectAlternativeNames("*.quillndice.com", "quillndice.com")
             validationMethod("DNS")
             tags(envTags(env, "qnd-cert"))
         }
@@ -39,3 +40,5 @@ suspend fun qndCertificate(env: Stack): Certificate =
             retainOnDelete(true)
         }
     }
+
+

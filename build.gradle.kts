@@ -28,6 +28,7 @@ dependencies {
     implementation("com.pulumi:pulumi:0.15.0")
     implementation("org.virtuslab:pulumi-kotlin:0.11.0.0")
     implementation("org.virtuslab:pulumi-aws-kotlin:6.49.1.0")
+    implementation("com.pulumi:postgresql:3.15.0")
     implementation("org.virtuslab:pulumi-kubernetes-kotlin:4.16.0.0")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("org.jetbrains.kotlin:kotlin-reflect")

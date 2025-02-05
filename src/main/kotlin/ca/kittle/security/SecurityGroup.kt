@@ -40,6 +40,35 @@ suspend fun createMongoSecurityGroup(env: Stack, vpcId: Output<String>): Securit
     return sg
 }
 
+suspend fun createPostgresSecurityGroup(env: Stack, vpcId: Output<String>): SecurityGroup {
+    val sg = securityGroup("${env.stackName}-postgres-security-group") {
+        args {
+            vpcId(vpcId)
+            tags(envTags(env, "${env.stackName}-postgres-security-group"))
+        }
+    }
+    val sgId = sg.id.applyValue(fun(name: String): String { return name })
+    securityGroupIngressRule("${env.stackName}-postgress-ingress-http") {
+        args {
+            securityGroupId(sgId)
+            cidrIpv4(vpcCidr(env))
+            fromPort(5432)
+            ipProtocol("tcp")
+            toPort(5432)
+        }
+    }
+    securityGroupEgressRule("${env.stackName}-postgres-egress-all") {
+        args {
+            securityGroupId(sgId)
+            fromPort(0)
+            toPort(0)
+            cidrIpv4("0.0.0.0/0")
+            ipProtocol("-1")
+        }
+    }
+    return sg
+}
+
 suspend fun createEcsSecurityGroup(env: Stack, vpcId: Output<String>, mongoSG: SecurityGroup): SecurityGroup {
     val mongoSGId = mongoSG.id.applyValue(fun(name: String): String { return name })
     val sg = securityGroup("${env.stackName}-ecs-security-group") {

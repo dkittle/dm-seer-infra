@@ -3,3 +3,4 @@ config:
   aws:region: ca-central-1
   dmseer-infra:env: prod
   dmseer-infra:fqdn: dmseer.quillndice.com
+encryptionsalt: v1:upAdEQMf5+8=:v1:oikkeRF4iv+m9teo:u7ALRizroHFZJ25l1haorZkHHifsPg==

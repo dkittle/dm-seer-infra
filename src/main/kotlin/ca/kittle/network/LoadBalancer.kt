@@ -56,7 +56,9 @@ suspend fun createListeners(
             .loadBalancerArn(loadBalancerArn)
             .port(443)
             .protocol("HTTPS")
-            .certificateArn(certificateArn)
+            .sslPolicy("ELBSecurityPolicy-TLS13-1-2-2021-06")
+//            .certificateArn(certificateArn)
+            .certificateArn("arn:aws:acm:ca-central-1:814245790557:certificate/fa959296-b8a7-4465-b1d5-309ca005ee0a")
             .defaultActions(
                 listOf(
                     ListenerDefaultActionArgs.builder()
