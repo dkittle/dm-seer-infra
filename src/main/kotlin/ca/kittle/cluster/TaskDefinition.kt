@@ -62,8 +62,8 @@ suspend fun createFGTaskDefinition(env: Stack, taskExecutionRole: Role): TaskDef
                     {
                         "name": "dmseer-app-${env.stackName}",
                         "image": "814245790557.dkr.ecr.ca-central-1.amazonaws.com/prod-container-repository-a6bf986",
-                        "cpu": 512,
-                        "memory": 960,
+                        "cpu": 256,
+                        "memory": 512,
                         "logConfiguration": {
                             "logDriver": "awslogs",
                             "options": {
