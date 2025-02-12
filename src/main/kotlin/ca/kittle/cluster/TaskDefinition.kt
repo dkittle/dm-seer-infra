@@ -69,7 +69,7 @@ suspend fun createFGTaskDefinition(env: Stack, taskExecutionRole: Role): TaskDef
                             "options": {
                                 "awslogs-create-group": "true",
                                 "awslogs-group": "ecs-dmseer",
-                                "awslogs-region": "ca-central-1",
+                               set  "awslogs-region": "ca-central-1",
                                 "awslogs-stream-prefix": "ecs"
                             }
                         },

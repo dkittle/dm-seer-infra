@@ -6,6 +6,7 @@ import com.pulumi.aws.ec2.kotlin.SecurityGroup
 import com.pulumi.aws.rds.kotlin.Instance
 import com.pulumi.aws.rds.kotlin.enums.InstanceType
 import com.pulumi.aws.rds.kotlin.instance
+import com.pulumi.aws.rds.kotlin.parameterGroup
 import com.pulumi.aws.ssm.kotlin.SsmFunctions.getParameter
 import com.pulumi.core.Output
 
@@ -20,7 +21,7 @@ suspend fun createPostgresDatabase(
     return instance("${env.stackName}-dmseer-postgres") {
         args {
             identifier("dmseer-postgres-db")
-            instanceClass(InstanceType.T3_Micro)
+            instanceClass(InstanceType.T4G_Micro)
             allocatedStorage(20)
             engine("postgres")
             engineVersion("16")
@@ -30,6 +31,13 @@ suspend fun createPostgresDatabase(
             autoMinorVersionUpgrade(true)
             maxAllocatedStorage(50)
             storageEncrypted(true)
+            parameterGroup("${env.stackName}-dmseer-postgres-parameter-group") {
+                args {
+                    parameters {
+
+                    }
+                }
+            }
             dbSubnetGroupName(subnetGroupName)
             vpcSecurityGroupIds(listOf(securityGroupId))
             skipFinalSnapshot(true)
