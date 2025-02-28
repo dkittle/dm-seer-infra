@@ -31,13 +31,6 @@ suspend fun createPostgresDatabase(
             autoMinorVersionUpgrade(true)
             maxAllocatedStorage(50)
             storageEncrypted(true)
-            parameterGroup("${env.stackName}-dmseer-postgres-parameter-group") {
-                args {
-                    parameters {
-
-                    }
-                }
-            }
             dbSubnetGroupName(subnetGroupName)
             vpcSecurityGroupIds(listOf(securityGroupId))
             skipFinalSnapshot(true)

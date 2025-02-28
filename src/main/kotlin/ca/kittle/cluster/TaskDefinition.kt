@@ -1,6 +1,7 @@
 package ca.kittle.cluster
 
 import ca.kittle.Stack
+import ca.kittle.envTags
 import com.pulumi.aws.ecr.kotlin.Repository
 import com.pulumi.aws.ecs.kotlin.TaskDefinition
 import com.pulumi.aws.ecs.kotlin.taskDefinition
@@ -69,7 +70,7 @@ suspend fun createFGTaskDefinition(env: Stack, taskExecutionRole: Role): TaskDef
                             "options": {
                                 "awslogs-create-group": "true",
                                 "awslogs-group": "ecs-dmseer",
-                               set  "awslogs-region": "ca-central-1",
+                                "awslogs-region": "ca-central-1",
                                 "awslogs-stream-prefix": "ecs"
                             }
                         },
@@ -99,6 +100,9 @@ suspend fun createFGTaskDefinition(env: Stack, taskExecutionRole: Role): TaskDef
                             "name": "SEER_BOT_TOKEN",
                             "valueFrom": "arn:aws:ssm:ca-central-1:814245790557:parameter/shared-config/${env.stackName}/dmseer/discord_bot_token"                        
                         },{
+                            "name": "DMSEER_REDIRECT_URI",
+                            "valueFrom": "arn:aws:ssm:ca-central-1:814245790557:parameter/shared-config/${env.stackName}/dmseer/discord_redirect_uri"                        
+                        },{
                             "name": "JWT_SECRET",
                             "valueFrom": "arn:aws:ssm:ca-central-1:814245790557:parameter/shared-config/${env.stackName}/dmseer/jwt_secret"                        
                         },{
@@ -108,9 +112,7 @@ suspend fun createFGTaskDefinition(env: Stack, taskExecutionRole: Role): TaskDef
                     }
                 ]
                 """.trimIndent())
+            tags(envTags(env, "${env.stackName}-dmseer-task-definition"))
         }
-//        opts {
-//            dependsOn(repository)
-//        }
     }
 }
