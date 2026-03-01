@@ -4,6 +4,7 @@ import ca.kittle.compute.createEc2Instance
 import ca.kittle.network.*
 import ca.kittle.security.*
 import ca.kittle.storage.createPostgresDatabase
+import ca.kittle.website.createWebsite
 import com.pulumi.Config
 import com.pulumi.aws.ec2.kotlin.enums.InstanceType
 import com.pulumi.aws.lb.kotlin.targetGroupAttachment
@@ -230,6 +231,10 @@ fun run(ctx: Context) {
                 port(80)
             }
         }
+
+        val qndContent = createWebsite(env, "qnd-content", "content.quillndice.com")
+        val qndContentUrl = qndContent.domainName.applyValue(fun(name: String): String = name)
+        ctx.export("qnd content url", qndContentUrl)
 
         val containerRegistryUrl = repositoryUrl.applyValue(fun(name: String): String { return name })
         val loadBalancerDns = loadBalancer.dnsName.applyValue(fun(name: String): String { return name })
