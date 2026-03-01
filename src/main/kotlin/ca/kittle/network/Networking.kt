@@ -132,6 +132,131 @@ suspend fun createFargateTargetGroup(env: Stack, vpcId: Output<String>): TargetG
     }
 }
 
+suspend fun createWebsiteTargetGroup(env: Stack, vpcId: Output<String>): TargetGroup {
+    return targetGroup("${env.stackName}-website-target-group") {
+        args {
+            name("${env.stackName}-website-target")
+            port(80)
+            protocol("HTTP")
+            targetType("instance")
+            vpcId(vpcId)
+            healthCheck {
+                enabled(true)
+                path("/")
+                port("traffic-port")
+                protocol("HTTP")
+            }
+            tags(envTags(env, "${env.stackName}-website-target-group"))
+        }
+    }
+}
+
+suspend fun createPrivateRouteTable(env: Stack, vpcId: Output<String>): com.pulumi.aws.ec2.kotlin.RouteTable {
+    return routeTable("${env.stackName}-private-route-table") {
+        args {
+            vpcId(vpcId)
+            tags(envTags(env, "${env.stackName}-private-route-table"))
+        }
+    }
+}
+
+suspend fun associatePrivateSubnetRouteTable(
+    env: Stack,
+    resourceName: String,
+    subnetId: Output<String>,
+    routeTable: com.pulumi.aws.ec2.kotlin.RouteTable,
+) {
+    val routeTableId = routeTable.id.applyValue(fun(id: String): String { return id })
+    routeTableAssociation("${env.stackName}-$resourceName") {
+        args {
+            subnetId(subnetId)
+            routeTableId(routeTableId)
+        }
+    }
+}
+
+suspend fun createPrivateInstanceEndpoints(
+    env: Stack,
+    vpcId: Output<String>,
+    subnet1Id: Output<String>,
+    subnet2Id: Output<String>,
+    routeTableId: Output<String>,
+    endpointSecurityGroup: SecurityGroup,
+) {
+    val endpointSecurityGroupId = endpointSecurityGroup.id.applyValue(fun(id: String): String { return id })
+    val commonTags = envTags(env, "${env.stackName}-private-endpoints")
+
+    vpcEndpoint("${env.stackName}-ecr-dkr-endpoint") {
+        args {
+            vpcId(vpcId)
+            serviceName("com.amazonaws.ca-central-1.ecr.dkr")
+            vpcEndpointType("Interface")
+            subnetIds(subnet1Id, subnet2Id)
+            securityGroupIds(endpointSecurityGroupId)
+            privateDnsEnabled(true)
+            tags(commonTags)
+        }
+    }
+
+    vpcEndpoint("${env.stackName}-ecr-api-endpoint") {
+        args {
+            vpcId(vpcId)
+            serviceName("com.amazonaws.ca-central-1.ecr.api")
+            vpcEndpointType("Interface")
+            subnetIds(subnet1Id, subnet2Id)
+            securityGroupIds(endpointSecurityGroupId)
+            privateDnsEnabled(true)
+            tags(commonTags)
+        }
+    }
+
+    vpcEndpoint("${env.stackName}-ssm-endpoint") {
+        args {
+            vpcId(vpcId)
+            serviceName("com.amazonaws.ca-central-1.ssm")
+            vpcEndpointType("Interface")
+            subnetIds(subnet1Id, subnet2Id)
+            securityGroupIds(endpointSecurityGroupId)
+            privateDnsEnabled(true)
+            tags(commonTags)
+        }
+    }
+
+    vpcEndpoint("${env.stackName}-ssmmessages-endpoint") {
+        args {
+            vpcId(vpcId)
+            serviceName("com.amazonaws.ca-central-1.ssmmessages")
+            vpcEndpointType("Interface")
+            subnetIds(subnet1Id, subnet2Id)
+            securityGroupIds(endpointSecurityGroupId)
+            privateDnsEnabled(true)
+            tags(commonTags)
+        }
+    }
+
+    vpcEndpoint("${env.stackName}-ec2messages-endpoint") {
+        args {
+            vpcId(vpcId)
+            serviceName("com.amazonaws.ca-central-1.ec2messages")
+            vpcEndpointType("Interface")
+            subnetIds(subnet1Id, subnet2Id)
+            securityGroupIds(endpointSecurityGroupId)
+            privateDnsEnabled(true)
+            tags(commonTags)
+        }
+    }
+
+    vpcEndpoint("${env.stackName}-s3-endpoint") {
+        args {
+            vpcId(vpcId)
+            serviceName("com.amazonaws.ca-central-1.s3")
+            vpcEndpointType("Gateway")
+            routeTableIds(routeTableId)
+            tags(commonTags)
+        }
+    }
+}
+
 
 suspend fun createInternetGateway(env: Stack, vpc: Vpc): InternetGateway {
     val vpcId = vpc.id.applyValue(fun(name: String): String { return name })
@@ -249,4 +374,3 @@ suspend fun createInterfaceEndpoints(env: Stack, vpcId: Output<String>, routeTab
     }
 
 }
-

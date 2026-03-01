@@ -40,7 +40,7 @@ suspend fun createMongoSecurityGroup(env: Stack, vpcId: Output<String>): Securit
     return sg
 }
 
-suspend fun createPostgresSecurityGroup(env: Stack, vpcId: Output<String>): SecurityGroup {
+suspend fun createPostgresSecurityGroup(env: Stack, vpcId: Output<String>, clientSecurityGroup: SecurityGroup? = null): SecurityGroup {
     val sg = securityGroup("${env.stackName}-postgres-security-group") {
         args {
             vpcId(vpcId)
@@ -48,10 +48,15 @@ suspend fun createPostgresSecurityGroup(env: Stack, vpcId: Output<String>): Secu
         }
     }
     val sgId = sg.id.applyValue(fun(name: String): String { return name })
+    val clientSecurityGroupId = clientSecurityGroup?.id?.applyValue(fun(name: String): String { return name })
     securityGroupIngressRule("${env.stackName}-postgress-ingress-http") {
         args {
             securityGroupId(sgId)
-            cidrIpv4(vpcCidr(env))
+            if (clientSecurityGroupId != null) {
+                referencedSecurityGroupId(clientSecurityGroupId)
+            } else {
+                cidrIpv4(vpcCidr(env))
+            }
             fromPort(5432)
             ipProtocol("tcp")
             toPort(5432)
@@ -98,6 +103,97 @@ suspend fun createEcsSecurityGroup(env: Stack, vpcId: Output<String>, mongoSG: S
         }
     }
     securityGroupEgressRule("${env.stackName}-ecs-egress-all") {
+        args {
+            securityGroupId(sgId)
+            cidrIpv4("0.0.0.0/0")
+            ipProtocol("-1")
+        }
+    }
+    return sg
+}
+
+suspend fun createWebsiteSecurityGroup(env: Stack, vpcId: Output<String>, loadBalancerSecurityGroup: SecurityGroup? = null): SecurityGroup {
+    val sg = securityGroup("${env.stackName}-website-security-group") {
+        args {
+            description("Allow inbound web traffic for the website instance")
+            vpcId(vpcId)
+            tags(envTags(env, "${env.stackName}-website-security-group"))
+        }
+    }
+    val sgId = sg.id.applyValue(fun(name: String): String { return name })
+    val loadBalancerSecurityGroupId = loadBalancerSecurityGroup?.id?.applyValue(fun(name: String): String { return name })
+    securityGroupIngressRule("${env.stackName}-website-ingress-http") {
+        args {
+            securityGroupId(sgId)
+            if (loadBalancerSecurityGroupId != null) {
+                referencedSecurityGroupId(loadBalancerSecurityGroupId)
+            } else {
+                cidrIpv4("0.0.0.0/0")
+            }
+            fromPort(80)
+            ipProtocol("tcp")
+            toPort(80)
+        }
+    }
+    securityGroupEgressRule("${env.stackName}-website-egress-all") {
+        args {
+            securityGroupId(sgId)
+            cidrIpv4("0.0.0.0/0")
+            ipProtocol("-1")
+        }
+    }
+    return sg
+}
+
+suspend fun createApiSecurityGroup(env: Stack, vpcId: Output<String>, frontendSecurityGroup: SecurityGroup): SecurityGroup {
+    val sg = securityGroup("${env.stackName}-api-security-group") {
+        args {
+            description("Allow inbound API traffic from the frontend instance")
+            vpcId(vpcId)
+            tags(envTags(env, "${env.stackName}-api-security-group"))
+        }
+    }
+    val sgId = sg.id.applyValue(fun(name: String): String { return name })
+    val frontendSecurityGroupId = frontendSecurityGroup.id.applyValue(fun(name: String): String { return name })
+    securityGroupIngressRule("${env.stackName}-api-ingress-http") {
+        args {
+            securityGroupId(sgId)
+            referencedSecurityGroupId(frontendSecurityGroupId)
+            fromPort(8081)
+            ipProtocol("tcp")
+            toPort(8081)
+        }
+    }
+    securityGroupEgressRule("${env.stackName}-api-egress-all") {
+        args {
+            securityGroupId(sgId)
+            cidrIpv4("0.0.0.0/0")
+            ipProtocol("-1")
+        }
+    }
+    return sg
+}
+
+suspend fun createPrivateEndpointSecurityGroup(env: Stack, vpcId: Output<String>, clientSecurityGroup: SecurityGroup): SecurityGroup {
+    val sg = securityGroup("${env.stackName}-private-endpoint-security-group") {
+        args {
+            description("Allow HTTPS traffic from private application instances to interface endpoints")
+            vpcId(vpcId)
+            tags(envTags(env, "${env.stackName}-private-endpoint-security-group"))
+        }
+    }
+    val sgId = sg.id.applyValue(fun(name: String): String { return name })
+    val clientSecurityGroupId = clientSecurityGroup.id.applyValue(fun(name: String): String { return name })
+    securityGroupIngressRule("${env.stackName}-private-endpoint-ingress-https") {
+        args {
+            securityGroupId(sgId)
+            referencedSecurityGroupId(clientSecurityGroupId)
+            fromPort(443)
+            ipProtocol("tcp")
+            toPort(443)
+        }
+    }
+    securityGroupEgressRule("${env.stackName}-private-endpoint-egress-all") {
         args {
             securityGroupId(sgId)
             cidrIpv4("0.0.0.0/0")
@@ -173,10 +269,8 @@ suspend fun createElbSecurityGroup(env: Stack, vpcId: Output<String>): SecurityG
     securityGroupEgressRule("${env.stackName}-ecs-egress-http") {
         args {
             securityGroupId(sgId)
-            cidrIpv4(vpcCidr(env))
-            fromPort(8081)
-            ipProtocol("tcp")
-            toPort(8081)
+            cidrIpv4("0.0.0.0/0")
+            ipProtocol("-1")
         }
     }
 

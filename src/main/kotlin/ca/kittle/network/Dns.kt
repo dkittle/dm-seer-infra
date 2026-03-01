@@ -54,3 +54,32 @@ suspend fun createApiDomainRecord(env: Stack, loadBalancer: LoadBalancer): Recor
         }
     }
 }
+
+suspend fun createWebsiteDomainAliasRecord(env: Stack, loadBalancer: LoadBalancer): Record {
+    val alias = loadBalancer.dnsName.applyValue(fun(name: String): String { return name })
+    val zoneId = loadBalancer.zoneId.applyValue(fun(name: String): String { return name })
+    return record("${env.name.lowercase()}-website-domain-record") {
+        args {
+            zoneId(domainNames(env).second)
+            name(domainNames(env).first)
+            aliases {
+                name(alias)
+                zoneId(zoneId)
+                evaluateTargetHealth(false)
+            }
+            type("A")
+        }
+    }
+}
+
+suspend fun createWebsiteDomainRecord(env: Stack, publicIpAddress: com.pulumi.core.Output<String>): Record {
+    return record("${env.name.lowercase()}-website-domain-record") {
+        args {
+            zoneId(domainNames(env).second)
+            name(domainNames(env).first)
+            records(publicIpAddress)
+            ttl(300)
+            type("A")
+        }
+    }
+}
