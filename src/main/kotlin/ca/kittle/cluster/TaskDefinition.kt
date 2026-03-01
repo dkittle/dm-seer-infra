@@ -1,8 +1,8 @@
 package ca.kittle.cluster
 
 import ca.kittle.Stack
+import ca.kittle.renderApiTaskDefinitionSecrets
 import ca.kittle.envTags
-import com.pulumi.aws.ecr.kotlin.Repository
 import com.pulumi.aws.ecs.kotlin.TaskDefinition
 import com.pulumi.aws.ecs.kotlin.taskDefinition
 import com.pulumi.aws.iam.kotlin.Role
@@ -81,34 +81,9 @@ suspend fun createFGTaskDefinition(env: Stack, taskExecutionRole: Role): TaskDef
                             }
                         ],
                         "essential": true,
-                        "secrets": [{
-                            "name": "POSTGRES_HOST",
-                            "valueFrom": "arn:aws:ssm:ca-central-1:814245790557:parameter/shared-config/${env.stackName}/postgres/host"                        
-                        },{
-                            "name": "POSTGRES_USERNAME",
-                            "valueFrom": "arn:aws:ssm:ca-central-1:814245790557:parameter/shared-config/${env.stackName}/postgres/dmseer/user/username"                        
-                        },{
-                            "name": "POSTGRES_PASSWORD",
-                            "valueFrom": "arn:aws:ssm:ca-central-1:814245790557:parameter/shared-config/${env.stackName}/postgres/dmseer/user/password"                        
-                        },{
-                            "name": "ADMIN_USERNAME",
-                            "valueFrom": "arn:aws:ssm:ca-central-1:814245790557:parameter/shared-config/${env.stackName}/dmseer/admin_username"                        
-                        },{
-                            "name": "ADMIN_PASSWORD",
-                            "valueFrom": "arn:aws:ssm:ca-central-1:814245790557:parameter/shared-config/${env.stackName}/dmseer/admin_password"                        
-                        },{
-                            "name": "SEER_BOT_TOKEN",
-                            "valueFrom": "arn:aws:ssm:ca-central-1:814245790557:parameter/shared-config/${env.stackName}/dmseer/discord_bot_token"                        
-                        },{
-                            "name": "DMSEER_REDIRECT_URI",
-                            "valueFrom": "arn:aws:ssm:ca-central-1:814245790557:parameter/shared-config/${env.stackName}/dmseer/discord_redirect_uri"                        
-                        },{
-                            "name": "JWT_SECRET",
-                            "valueFrom": "arn:aws:ssm:ca-central-1:814245790557:parameter/shared-config/${env.stackName}/dmseer/jwt_secret"                        
-                        },{
-                            "name": "POSTMARK_API_KEY",
-                            "valueFrom": "arn:aws:ssm:ca-central-1:814245790557:parameter/shared-config/${env.stackName}/dmseer/postman_apikey"                        
-                        }]
+                        "secrets": [
+                            ${renderApiTaskDefinitionSecrets(env)}
+                        ]
                     }
                 ]
                 """.trimIndent())

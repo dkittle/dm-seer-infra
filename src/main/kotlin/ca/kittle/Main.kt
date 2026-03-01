@@ -17,7 +17,6 @@ import kotlinx.coroutines.runBlocking
 val mainScope = MainScope()
 const val DOMAIN_NAME_KEY = "fqdn"
 private const val DEFAULT_CERTIFICATE_ARN = "arn:aws:acm:ca-central-1:814245790557:certificate/fa959296-b8a7-4465-b1d5-309ca005ee0a"
-private const val AWS_REGION = "ca-central-1"
 
 fun main() {
     Pulumi.run(::run)
@@ -104,56 +103,60 @@ private fun websiteUserData(websiteImage: Output<String>, apiPrivateIp: Output<S
         })
     })
 
-private fun apiUserData(env: Stack, apiImage: Output<String>, postgresEndpoint: Output<String>): Output<String> =
-    apiImage.apply(fun(image: String): Output<String> {
-        return postgresEndpoint.applyValue(fun(postgresHost: String): String {
-            val ecrHost = image.substringBefore("/")
-            return """
-                #!/bin/bash
+private fun apiUserData(env: Stack, apiImage: Output<String>): Output<String> =
+    apiImage.applyValue(fun(image: String): String {
+        val ecrHost = image.substringBefore("/")
+        val apiEnvRenderScript = renderApiEnvFileScript(env)
+        return """
+            #!/bin/bash
+            cat <<'EOF' >/usr/local/bin/ensure-aws-cli.sh
+            #!/bin/bash
+            set -euo pipefail
+            if ! command -v aws >/dev/null 2>&1; then
                 dnf install -y awscli
-                cat <<'EOF' >/usr/local/bin/ecr-login.sh
-                #!/bin/bash
-                aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ecrHost
-                EOF
-                chmod +x /usr/local/bin/ecr-login.sh
-                cat <<'EOF' >/usr/local/bin/render-api-env.sh
-                #!/bin/bash
-                cat >/etc/dmseer-api.env <<ENVVARS
-                POSTGRES_HOST=$postgresHost
-                POSTGRES_USERNAME=$(aws ssm get-parameter --region $AWS_REGION --name /shared-config/${env.stackName}/postgres/dmseer/user/username --query Parameter.Value --output text)
-                POSTGRES_PASSWORD=$(aws ssm get-parameter --region $AWS_REGION --name /shared-config/${env.stackName}/postgres/dmseer/user/password --with-decryption --query Parameter.Value --output text)
-                ADMIN_USERNAME=$(aws ssm get-parameter --region $AWS_REGION --name /shared-config/${env.stackName}/dmseer/admin_username --query Parameter.Value --output text)
-                ADMIN_PASSWORD=$(aws ssm get-parameter --region $AWS_REGION --name /shared-config/${env.stackName}/dmseer/admin_password --with-decryption --query Parameter.Value --output text)
-                SEER_BOT_TOKEN=$(aws ssm get-parameter --region $AWS_REGION --name /shared-config/${env.stackName}/dmseer/discord_bot_token --with-decryption --query Parameter.Value --output text)
-                DMSEER_REDIRECT_URI=$(aws ssm get-parameter --region $AWS_REGION --name /shared-config/${env.stackName}/dmseer/discord_redirect_uri --query Parameter.Value --output text)
-                JWT_SECRET=$(aws ssm get-parameter --region $AWS_REGION --name /shared-config/${env.stackName}/dmseer/jwt_secret --with-decryption --query Parameter.Value --output text)
-                POSTMARK_API_KEY=$(aws ssm get-parameter --region $AWS_REGION --name /shared-config/${env.stackName}/dmseer/postman_apikey --with-decryption --query Parameter.Value --output text)
-                ENVVARS
-                EOF
-                chmod +x /usr/local/bin/render-api-env.sh
-                cat <<'EOF' >/etc/systemd/system/dmseer-api.service
-                [Unit]
-                Description=DM Seer API container
-                Requires=docker.service
-                After=docker.service
+            fi
+            EOF
+            chmod +x /usr/local/bin/ensure-aws-cli.sh
+            cat <<'EOF' >/usr/local/bin/ecr-login.sh
+            #!/bin/bash
+            set -euo pipefail
+            aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ecrHost
+            EOF
+            chmod +x /usr/local/bin/ecr-login.sh
+            cat <<'EOF' >/usr/local/bin/render-api-env.sh
+            $apiEnvRenderScript
+            EOF
+            chmod +x /usr/local/bin/render-api-env.sh
+            cat <<'EOF' >/usr/local/bin/start-dmseer-api.sh
+            #!/bin/bash
+            set -euo pipefail
+            /usr/local/bin/ensure-aws-cli.sh
+            /usr/local/bin/render-api-env.sh
+            /usr/local/bin/ecr-login.sh
+            /usr/bin/docker pull $image
+            exec /usr/bin/docker run --rm --name dmseer-api --env-file /etc/dmseer-api.env -p 8081:8081 $image
+            EOF
+            chmod +x /usr/local/bin/start-dmseer-api.sh
+            cat <<'EOF' >/etc/systemd/system/dmseer-api.service
+            [Unit]
+            Description=DM Seer API container
+            Requires=docker.service
+            After=network-online.target docker.service
+            Wants=network-online.target
 
-                [Service]
-                Restart=always
-                ExecStartPre=/bin/sh -c '/usr/local/bin/render-api-env.sh'
-                ExecStartPre=/bin/sh -c '/usr/local/bin/ecr-login.sh'
-                ExecStartPre=/usr/bin/docker pull $image
-                ExecStartPre=-/usr/bin/docker rm -f dmseer-api
-                ExecStart=/usr/bin/docker run --rm --name dmseer-api --env-file /etc/dmseer-api.env -p 8081:8081 $image
-                ExecStop=/usr/bin/docker stop dmseer-api
+            [Service]
+            Restart=always
+            ExecStartPre=-/usr/bin/docker rm -f dmseer-api
+            ExecStart=/usr/local/bin/start-dmseer-api.sh
+            ExecStop=/usr/bin/docker stop dmseer-api
 
-                [Install]
-                WantedBy=multi-user.target
-                EOF
-                systemctl daemon-reload
-                systemctl enable --now docker
-                systemctl enable --now dmseer-api
-            """.trimIndent()
-        })
+            [Install]
+            WantedBy=multi-user.target
+            EOF
+            systemctl daemon-reload
+            systemctl enable --now docker
+            systemctl enable --now dmseer-api
+        """.trimIndent()
     })
 
 fun run(ctx: Context) {
@@ -205,7 +208,7 @@ fun run(ctx: Context) {
             securityGroups = listOf(apiSecurityGroup),
             instanceType = InstanceType.T4g_Medium,
             iamInstanceProfileName = instanceProfileName,
-            userData = apiUserData(env, apiImage, postgresEndpoint),
+            userData = apiUserData(env, apiImage),
         )
         val apiPrivateIp = apiInstance.privateIp.applyValue(fun(ip: String): String { return ip })
         val websiteInstance = createEc2Instance(
