@@ -29,6 +29,8 @@ enum class Stack {
     Prod;
 
     val stackName: String = name.lowercase()
+
+    fun subdomain(): String = if (this == Prod) "" else "$stackName."
 }
 
 fun envTags(env: Stack, resource: String): Map<String, String> = mapOf(

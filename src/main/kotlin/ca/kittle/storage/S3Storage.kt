@@ -2,40 +2,53 @@ package ca.kittle.storage
 
 import ca.kittle.Stack
 import ca.kittle.envTags
-import com.pulumi.aws.s3.kotlin.*
+import com.pulumi.aws.s3.kotlin.Bucket
+import com.pulumi.aws.s3.kotlin.bucket
+import com.pulumi.aws.s3.kotlin.bucketAclV2
+import com.pulumi.aws.s3.kotlin.bucketOwnershipControls
+import com.pulumi.aws.s3.kotlin.bucketPolicy
+import com.pulumi.aws.s3.kotlin.bucketPublicAccessBlock
 
-
-suspend fun staticWebsite(env: Stack): Bucket =
-    bucket("${env.name.lowercase()}-qnd-website") {
+suspend fun createWebsiteBucket(
+    env: Stack,
+    name: String
+): Bucket =
+    bucket("${env.stackName}-$name-bucket") {
         args {
             website {
                 indexDocument("index.html")
                 errorDocument("error.html")
-                routingRules("""
-[{
-    "Condition": {
-        "KeyPrefixEquals": "/storyline"
-    },
-    "Redirect": {
-        "ReplaceKeyPrefixWith": "index.html"
-    }
-}]
-                """)
+                routingRules(
+                    """
+                    [{
+                        "Condition": {
+                            "KeyPrefixEquals": "/storyline"
+                        },
+                        "Redirect": {
+                            "ReplaceKeyPrefixWith": "index.html"
+                        }
+                    }]
+                """
+                )
             }
-            tags(envTags(env, "static-website-bucket"))
+            tags(envTags(env, "$name-bucket"))
         }
     }
 
-suspend fun secureStaticWebsite(env: Stack, source: Bucket) {
-    val sourceId = source.id.applyValue(fun(id: String): String { return id })
+suspend fun secureWebsite(
+    env: Stack,
+    source: Bucket,
+    name: String
+) {
+    val sourceId = source.id.applyValue(fun(id: String): String = id)
 
-    val ownerControls = bucketOwnershipControls("${env.name.lowercase()}-qnd-website-ownership-controls") {
+    bucketOwnershipControls("${env.stackName}-$name-ownership-controls") {
         args {
             bucket(sourceId)
             rule { objectOwnership("BucketOwnerPreferred") }
         }
     }
-    val publicAccessBlock = bucketPublicAccessBlock("${env.name.lowercase()}-qnd-website-public-access-block") {
+    bucketPublicAccessBlock("${env.stackName}-$name-public-access-block") {
         args {
             bucket(sourceId)
             blockPublicAcls(false)
@@ -45,22 +58,23 @@ suspend fun secureStaticWebsite(env: Stack, source: Bucket) {
         }
     }
 
-    val publicAccessControl = bucketAclV2("${env.name.lowercase()}-qnd-website-public-access-block") {
+    bucketAclV2("${env.stackName}-$name-bucket-acl") {
         args {
             bucket(sourceId)
             acl("public-read")
         }
     }
 
-    val bucketPolicyJson = source.arn.applyValue(fun(arn: String): String {
-        return "{\"Version\": \"2012-10-17\", \"Statement\": [{ \"Sid\": \"PublicReadGetObject\", \"Effect\": \"Allow\", \"Principal\": \"*\", \"Action\": \"s3:GetObject\", \"Resource\": \"${arn}/*\" }]}";
-    })
+    val bucketPolicyJson =
+        source.arn.applyValue(
+            fun(arn: String): String =
+                "{\"Version\": \"2012-10-17\", \"Statement\": [{ \"Sid\": \"PublicReadGetObject\", \"Effect\": \"Allow\", \"Principal\": \"*\", \"Action\": \"s3:GetObject\", \"Resource\": \"$arn/*\" }]}"
+        )
 
-    val bucketPolicy = bucketPolicy("${env.name.lowercase()}-qnd-website-policy") {
+    bucketPolicy("${env.stackName}-$name-policy") {
         args {
             bucket(sourceId)
             policy(bucketPolicyJson)
         }
     }
-
 }
