@@ -1,6 +1,7 @@
 package ca.kittle
 
 import ca.kittle.compute.createEc2Instance
+import ca.kittle.compute.createElasticIp
 import ca.kittle.network.*
 import ca.kittle.security.*
 import ca.kittle.storage.createPostgresDatabase
@@ -167,8 +168,8 @@ fun run(ctx: Context) {
         val env = Stack.valueOf(ctx.stackName().replaceFirstChar { it.uppercase() })
         val config = Config.of("dmseer-infra")
         val certificateArn = config.get("certificateArn").orElse(DEFAULT_CERTIFICATE_ARN)
-        val websiteImageTag = config.get("websiteImageTag").orElse("website")
-        val apiImageTag = config.get("apiImageTag").orElse("api")
+        val websiteImageTag = config.get("websiteImageTag").orElse("qnd")
+        val apiImageTag = config.get("apiImageTag").orElse("dmseer")
         val infraStack = StackReference("organization/kittle-infra/${env.stackName}")
         val vpcId = infraStack.output("vpcId") as? Output<String> ?: error { "Cannot read vpcId" }
         val publicSubnet1Id = infraStack.output("publicSubnet1Id") as? Output<String> ?: error { "Cannot read public subnet 1 Id" }
@@ -176,7 +177,7 @@ fun run(ctx: Context) {
         val privateSubnet1Id = infraStack.output("privateSubnet1Id") as? Output<String> ?: error { "Cannot read private subnet 1 Id" }
         val privateSubnet2Id = infraStack.output("privateSubnet2Id") as? Output<String> ?: error { "Cannot read private subnet 2 Id" }
         val privateSubnetGroupName = infraStack.output("privateSubnetGroupName") as? Output<String> ?: error { "Cannot read private subnet group Id" }
-        val repositoryUrl = infraStack.output("repositoryUrl") as? Output<String> ?: error { "Cannot read vpcId" }
+        val repositoryUrl = infraStack.output("repositoryUrl") as? Output<String> ?: error { "Cannot read repository url" }
 
         val elbSG = createElbSecurityGroup(env, vpcId)
         val websiteSecurityGroup = createWebsiteSecurityGroup(env, vpcId, elbSG)
@@ -199,14 +200,13 @@ fun run(ctx: Context) {
         val loadBalancer = createLoadbalancer(env, publicSubnet1Id, publicSubnet2Id, elbSG)
         val websiteTargetGroup = createWebsiteTargetGroup(env, vpcId)
         createListeners(env, loadBalancer, websiteTargetGroup, certificateArn)
-        createWebsiteDomainAliasRecord(env, loadBalancer)
 
         // EC2
         val ec2ContainerHostProfile = createEc2ContainerHostProfile(env)
         val instanceProfileName = ec2ContainerHostProfile.name.applyValue(fun(name: String): String { return name })
         val apiInstance = createEc2Instance(
             stack = env,
-            resourceName = "api-instance",
+            resourceName = "dmseer-instance",
             subnetId = privateSubnet1Id,
             securityGroups = listOf(apiSecurityGroup),
             instanceType = InstanceType.T4g_Medium,
@@ -216,7 +216,7 @@ fun run(ctx: Context) {
         val apiPrivateIp = apiInstance.privateIp.applyValue(fun(ip: String): String { return ip })
         val websiteInstance = createEc2Instance(
             stack = env,
-            resourceName = "website-instance",
+            resourceName = "qnd-instance",
             subnetId = publicSubnet1Id,
             securityGroups = listOf(websiteSecurityGroup),
             instanceType = InstanceType.T4g_Micro,
@@ -224,9 +224,18 @@ fun run(ctx: Context) {
             iamInstanceProfileName = instanceProfileName,
             userData = websiteUserData(websiteImage, apiPrivateIp),
         )
+        val websitePublicIp = if (env == Stack.Prod) {
+            val websiteElasticIp = createElasticIp(env, "qnd-instance-eip", websiteInstance)
+            val elasticIp = websiteElasticIp.publicIp.applyValue(fun(ip: String): String { return ip })
+            createWebsiteInstanceDomainRecord(env, elasticIp)
+            elasticIp
+        } else {
+            createWebsiteDomainAliasRecord(env, loadBalancer)
+            websiteInstance.publicIp.applyValue(fun(ip: String): String { return ip })
+        }
         val websiteTargetGroupArn = websiteTargetGroup.arn.applyValue(fun(arn: String): String { return arn })
         val websiteInstanceId = websiteInstance.id.applyValue(fun(id: String): String { return id })
-        targetGroupAttachment("${env.stackName}-website-target-attachment") {
+        targetGroupAttachment("${env.stackName}-qnd-target-attachment") {
             args {
                 targetGroupArn(websiteTargetGroupArn)
                 targetId(websiteInstanceId)
@@ -236,17 +245,16 @@ fun run(ctx: Context) {
 
         val qndContent = createWebsite(env, "qnd-content", "content.quillndice.com")
         val qndContentUrl = qndContent.domainName.applyValue(fun(name: String): String = name)
-        ctx.export("qnd content url", qndContentUrl)
 
         val containerRegistryUrl = repositoryUrl.applyValue(fun(name: String): String { return name })
         val loadBalancerDns = loadBalancer.dnsName.applyValue(fun(name: String): String { return name })
-        val websitePublicIp = websiteInstance.publicIp.applyValue(fun(ip: String): String { return ip })
 
-        ctx.export("containerRegistryUrl", containerRegistryUrl)
-        ctx.export("postgresEndpoint", postgresEndpoint)
-        ctx.export("loadBalanceDns", loadBalancerDns)
-        ctx.export("websitePublicIp", websitePublicIp)
-        ctx.export("apiPrivateIp", apiPrivateIp)
+        ctx.export("container registry URL", containerRegistryUrl)
+        ctx.export("postgres endpoint", postgresEndpoint)
+        ctx.export("load balancer DNS", loadBalancerDns)
+        ctx.export("qnd public IP", websitePublicIp)
+        ctx.export("qnd content website URL", qndContentUrl)
+        ctx.export("dmseer private IP", apiPrivateIp)
     }
 
 }

@@ -125,7 +125,9 @@ suspend fun createWebsiteSecurityGroup(env: Stack, vpcId: Output<String>, loadBa
     securityGroupIngressRule("${env.stackName}-website-ingress-http") {
         args {
             securityGroupId(sgId)
-            if (loadBalancerSecurityGroupId != null) {
+            if (env == Stack.Prod) {
+                cidrIpv4("0.0.0.0/0")
+            } else if (loadBalancerSecurityGroupId != null) {
                 referencedSecurityGroupId(loadBalancerSecurityGroupId)
             } else {
                 cidrIpv4("0.0.0.0/0")
@@ -133,6 +135,15 @@ suspend fun createWebsiteSecurityGroup(env: Stack, vpcId: Output<String>, loadBa
             fromPort(80)
             ipProtocol("tcp")
             toPort(80)
+        }
+    }
+    securityGroupIngressRule("${env.stackName}-website-ingress-ssh-roncy") {
+        args {
+            securityGroupId(sgId)
+            cidrIpv4("173.32.0.0/14")
+            fromPort(22)
+            ipProtocol("tcp")
+            toPort(22)
         }
     }
     securityGroupEgressRule("${env.stackName}-website-egress-all") {

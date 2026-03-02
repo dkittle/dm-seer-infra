@@ -5,6 +5,7 @@ import com.pulumi.aws.cloudfront.kotlin.Distribution
 import com.pulumi.aws.alb.kotlin.LoadBalancer
 import com.pulumi.aws.route53.kotlin.Record
 import com.pulumi.aws.route53.kotlin.record
+import com.pulumi.core.Output
 
 
 private fun domainNames(env: Stack): Pair<String, String> =
@@ -71,6 +72,17 @@ suspend fun createWebsiteDomainAliasRecord(env: Stack, loadBalancer: LoadBalance
         }
     }
 }
+
+suspend fun createWebsiteInstanceDomainRecord(env: Stack, publicIp: Output<String>): Record =
+    record("${env.name.lowercase()}-website-domain-record") {
+        args {
+            zoneId(domainNames(env).second)
+            name(domainNames(env).first)
+            records(publicIp)
+            ttl(300)
+            type("A")
+        }
+    }
 
 suspend fun createWebsiteDomainRecord(env: Stack, cdn: Distribution, name: String, domainName: String): Record {
     val cdnAlias = cdn.domainName.applyValue(fun(name: String): String { return name })

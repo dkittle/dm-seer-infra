@@ -4,7 +4,6 @@ import ca.kittle.Stack
 import ca.kittle.envTags
 import com.pulumi.aws.s3.kotlin.Bucket
 import com.pulumi.aws.s3.kotlin.bucket
-import com.pulumi.aws.s3.kotlin.bucketAclV2
 import com.pulumi.aws.s3.kotlin.bucketOwnershipControls
 import com.pulumi.aws.s3.kotlin.bucketPolicy
 import com.pulumi.aws.s3.kotlin.bucketPublicAccessBlock
@@ -42,26 +41,19 @@ suspend fun secureWebsite(
 ) {
     val sourceId = source.id.applyValue(fun(id: String): String = id)
 
-    bucketOwnershipControls("${env.stackName}-$name-ownership-controls") {
+    val ownershipControls = bucketOwnershipControls("${env.stackName}-$name-ownership-controls") {
         args {
             bucket(sourceId)
             rule { objectOwnership("BucketOwnerPreferred") }
         }
     }
-    bucketPublicAccessBlock("${env.stackName}-$name-public-access-block") {
+    val publicAccessBlock = bucketPublicAccessBlock("${env.stackName}-$name-public-access-block") {
         args {
             bucket(sourceId)
             blockPublicAcls(false)
             blockPublicPolicy(false)
             ignorePublicAcls(false)
             restrictPublicBuckets(false)
-        }
-    }
-
-    bucketAclV2("${env.stackName}-$name-bucket-acl") {
-        args {
-            bucket(sourceId)
-            acl("public-read")
         }
     }
 
@@ -75,6 +67,9 @@ suspend fun secureWebsite(
         args {
             bucket(sourceId)
             policy(bucketPolicyJson)
+        }
+        opts {
+            dependsOn(ownershipControls, publicAccessBlock)
         }
     }
 }
